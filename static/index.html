@@ -70,12 +70,7 @@ function drawCircle(context,entity) {
             fill(); 
         }    
         stroke();  
-
-        // //moveTo(x,y);
-        // fillStyle = entity["colour"];
-        // strokeStyle = fillStyle;
-        // arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        // stroke();                                
+                        
     }
 }
 
@@ -148,9 +143,6 @@ function addEntity(entity, data) {
     let send_data = {}
     send_data[entity] = data
     socket.send(JSON.stringify(send_data));
-    // socket.send(JSON.stringify({"entity": data}));
-    // socket.send(JSON.stringify( {"entity": entity, "data": data} ) );
-
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -280,7 +272,6 @@ function wsSetup() {
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
-        
         socket.send(JSON.stringify(world));
     };
     socket.onerror = function(msg) {

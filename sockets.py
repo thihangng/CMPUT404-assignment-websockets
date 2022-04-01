@@ -95,10 +95,6 @@ def read_ws(ws,client):
         while True:
             msg = ws.receive()
             if msg is not None:
-                # received_packet = json.loads(msg)
-                # entity=received_packet.get('entity')
-                # data=received_packet.get('data')
-                # myWorld.set(entity,data)
                 if msg == '{}':
                     received_packet = myWorld.world()
                 else:
@@ -149,9 +145,6 @@ def flask_post_json():
 def update(entity):
     '''update the entities via this interface'''
     items = flask_post_json()
-    # myWorld.set(entity, items)
-    # en = myWorld.get(entity)
-    # return jsonify(en)
     for i in items:
         myWorld.update(entity, i, items[i])
 
