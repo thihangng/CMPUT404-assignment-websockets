@@ -101,7 +101,6 @@ def read_ws(ws,client):
                     received_packet = json.loads(msg)
                     for entity in received_packet:
                         myWorld.set(entity, received_packet[entity])
-                print(received_packet)
                 json_packet = json.dumps(received_packet)
                 for client in clients:
                     client.put(json_packet)
