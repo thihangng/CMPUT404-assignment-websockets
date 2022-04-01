@@ -33,6 +33,7 @@ var host = window.location.host;
 var context = canvas.getContext("2d");
 var W = canvas.width  = window.innerWidth-6;
 var H = canvas.height = window.innerHeight-50;
+var colors = ['rgb(255, 178, 0)', 'greenyellow', 'aqua', 'fuchsia'];
 var wscounter = 0;
 var socket;
 
@@ -51,11 +52,30 @@ function drawCircle(context,entity) {
         lineWidth = 3;
         var x = entity["x"];
         var y = entity["y"];
-        //moveTo(x,y);
         fillStyle = entity["colour"];
         strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        stroke();                                
+        arc(x, y, entity["radius"], 0, 2.0 * Math.PI, true);
+        
+        
+        if (entity["radius"] == 50) {
+            moveTo(x+35, y); 
+            arc(x, y, (entity["radius"])/2, 0, Math.PI, false);
+            moveTo(x-10, y-10);
+            arc(x-15, y-10, 5, 0, Math.PI * 2, true);  // Left eye
+            moveTo(x+15, y-10);
+            arc(x+10, y-10, 5, 0, Math.PI * 2, true);
+        }
+        else {
+            // setLineDash([4, 2]);
+            fill(); 
+        }    
+        stroke();  
+
+        // //moveTo(x,y);
+        // fillStyle = entity["colour"];
+        // strokeStyle = fillStyle;
+        // arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
+        // stroke();                                
     }
 }
 
@@ -125,7 +145,10 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
-    socket.send(JSON.stringify({"entity": data}));
+    let send_data = {}
+    send_data[entity] = data
+    socket.send(JSON.stringify(send_data));
+    // socket.send(JSON.stringify({"entity": data}));
     // socket.send(JSON.stringify( {"entity": entity, "data": data} ) );
 
 }
@@ -234,7 +257,7 @@ mouse = (function() {
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    addEntityWithoutName({'x':x,'y':y,'colour':colors[Math.floor(Math.random()* colors.length)], 'radius': 50});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
@@ -242,7 +265,7 @@ mouse.mouseuppers.push(function(x,y,clicked,e) {
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'green',
+    addEntityWithoutName({'x':x,'y':y,'colour':'yellow',
                           'radius':10});
 });
 
@@ -259,12 +282,6 @@ function wsSetup() {
         //XXX: TODO What are you going to do here?
         
         socket.send(JSON.stringify(world));
-        // var url = `ws://${host}/world`;
-        // sendJSONXMLHTTPRequest(url, null, function(object){
-        // 	// for (var key in object) {
-      	// 	// 	world[key] = object[key];
-    	// 	// }
-        // }); 
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -275,9 +292,8 @@ function wsSetup() {
             //XXX: TODO What are you going to do here?  
             var message = JSON.parse(msg.data);
             //addMessage(message["msg"]); 
-            for (var key in message) {
+            for (let key in message) {
                 world[key] = message[key];
-               
             }    
             drawNextFrame();      
         } catch (e) {

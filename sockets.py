@@ -91,26 +91,34 @@ def hello():
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
     # XXX: TODO IMPLEMENT ME
-    while True:
-        msg = ws.receive()
-        if msg is not None:
-            received_packet = json.loads(msg)
-            # entity=received_packet.get('entity')
-            # data=received_packet.get('data')
-            # myWorld.set(entity,data)
-
-            json_packet = json.dumps(received_packet)
-            for client in clients:
-                client.put(json_packet)
-        else:
-            break
+    try:
+        while True:
+            msg = ws.receive()
+            if msg is not None:
+                # received_packet = json.loads(msg)
+                # entity=received_packet.get('entity')
+                # data=received_packet.get('data')
+                # myWorld.set(entity,data)
+                if msg == '{}':
+                    received_packet = myWorld.world()
+                else:
+                    received_packet = json.loads(msg)
+                    for entity in received_packet:
+                        myWorld.set(entity, received_packet[entity])
+                print(received_packet)
+                json_packet = json.dumps(received_packet)
+                for client in clients:
+                    client.put(json_packet)
+            else:
+                break
+    except:
+        return
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
     # XXX: TODO IMPLEMENT ME
-    print("GET HERE SUBSRIBE")
     client = Client()
     clients.append(client)
     g = gevent.spawn(read_ws, ws, client )  
@@ -141,6 +149,9 @@ def flask_post_json():
 def update(entity):
     '''update the entities via this interface'''
     items = flask_post_json()
+    # myWorld.set(entity, items)
+    # en = myWorld.get(entity)
+    # return jsonify(en)
     for i in items:
         myWorld.update(entity, i, items[i])
 
